@@ -1,0 +1,156 @@
+{% extends 'main.html' %}
+
+{% block title %}Rating-Based Recommendations{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="section-title mb-5">Top-Rated Products</h1>
+    
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="search-container">
+                <form action="{{ url_for('rating_based') }}" method="GET">
+                    <div class="form-row align-items-center justify-content-center">
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <input type="number" class="form-control number-input" placeholder="# Results" name="nbr" min="1" max="50" value="10">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary search-btn w-100">Show Top Rated</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Explanation of rating-based recommendations -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">What are Rating-Based Recommendations?</h5>
+                    <p class="card-text">
+                        Rating-based recommendations simply show you the highest-rated products across all users. 
+                        This is a straightforward approach that highlights products with consistently positive feedback.
+                    </p>
+                    <p class="card-text">
+                        <strong>How it works:</strong> Simply select how many top-rated products you'd like to see and click the button above.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if message %}
+    <div class="message-alert">
+        {{ message }}
+    </div>
+    {% endif %}
+    
+    <!-- Display top-rated products -->
+    {% if not rating_based_rec.empty %}
+    <div class="row">
+        {% for index, row in rating_based_rec.iterrows() %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <img src="{{ row.ImageURL }}" class="card-img-top" alt="{{ row.Name }}" onerror="this.onerror=null;this.src='{{ random_product_image_urls[loop.index0 % 8] }}';">
+                <div class="card-body">
+                    <h5 class="card-title">{{ truncate(row.Name, 50) }}</h5>
+                    <p class="card-text">Brand: {{ row.Brand }}</p>
+                    <div class="rating">
+                        {% set rating = row.Rating|float %}
+                        {% for i in range(5) %}
+                            {% if i < rating|int %}
+                            <i class="fas fa-star"></i>
+                            {% elif i < rating and rating|int != rating %}
+                            <i class="fas fa-star-half-alt"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span>({{ row.ReviewCount|int }})</span>
+                    </div>
+                    <p class="price">${{ ((row.Rating + 8) * 4.99)|round(2) }}</p>
+                    <button class="btn btn-outline-primary card-button" data-toggle="modal" data-target="#productModal{{ index }}" data-product="{{ row.Name }}" data-brand="{{ row.Brand }}" data-image="{{ row.ImageURL }}" data-rating="{{ rating }}" data-reviews="{{ row.ReviewCount|int }}" data-price="{{ ((row.Rating + 8) * 4.99)|round(2) }}">View Details</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Modal -->
+        <div class="modal fade" id="productModal{{ index }}" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">{{ row.Name }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <img src="{{ row.ImageURL }}" class="img-fluid product-image" alt="{{ row.Name }}" onerror="this.src='https://via.placeholder.com/500x500?text=No+Image+Available'">
+                            </div>
+                            <div class="col-md-7 product-details">
+                                <h4>{{ row.Name }}</h4>
+                                <p>Brand: <span>{{ row.Brand }}</span></p>
+                                <div class="rating mb-3">
+                                    {% for i in range(5) %}
+                                        {% if i < rating|int %}
+                                        <i class="fas fa-star"></i>
+                                        {% elif i < rating and rating|int != rating %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ml-2 text-muted">({{ row.ReviewCount|int }} reviews)</span>
+                                </div>
+                                <p class="product-price mb-4">${{ ((row.Rating + 8) * 4.99)|round(2) }}</p>
+                                <p>This product has one of the highest ratings in our system. Users consistently rate it highly for quality, value, and performance.</p>
+                                <div class="quantity-control">
+                                    <button class="quantity-btn decrease">-</button>
+                                    <input type="text" class="quantity-input" value="1" readonly>
+                                    <button class="quantity-btn increase">+</button>
+                                </div>
+                                <div class="d-flex mt-4">
+                                    <button class="btn btn-primary mr-3"><i class="fas fa-cart-plus mr-2"></i> Add to Cart</button>
+                                    <button class="btn btn-outline-secondary"><i class="far fa-heart mr-2"></i> Wishlist</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle quantity buttons
+        const decreaseBtns = document.querySelectorAll('.quantity-btn.decrease');
+        const increaseBtns = document.querySelectorAll('.quantity-btn.increase');
+        
+        decreaseBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.nextElementSibling;
+                let value = parseInt(input.value);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+            });
+        });
+        
+        increaseBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                let value = parseInt(input.value);
+                input.value = value + 1;
+            });
+        });
+    });
+</script>
+{% endblock %}

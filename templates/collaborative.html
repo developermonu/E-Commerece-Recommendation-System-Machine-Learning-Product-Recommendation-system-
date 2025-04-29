@@ -1,0 +1,209 @@
+{% extends 'main.html' %}
+
+{% block title %}Collaborative Filtering Recommendations{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="section-title mb-5">Collaborative Filtering Recommendations</h1>
+    
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="search-container">
+                <form action="{{ url_for('collaborative') }}" method="POST" id="searchForm">
+                    <div class="form-row align-items-center">
+                        <div class="col-md-9 mb-3 mb-md-0">
+                            <input type="number" class="form-control search-input" placeholder="Enter a user ID (e.g., 4, 10, etc.)" name="user_id" id="user_id" required>
+                        </div>
+                        <div class="col-md-2 mb-3 mb-md-0">
+                            <input type="number" class="form-control number-input" placeholder="# Results" name="nbr" min="1" max="20" value="10">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary search-btn w-100"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Explanation of collaborative filtering -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">What is Collaborative Filtering?</h5>
+                    <p class="card-text">
+                        Collaborative filtering recommends products based on the preferences of similar users. Unlike content-based filtering, 
+                        it doesn't analyze product features but instead looks at user behavior patterns.
+                    </p>
+                    <p class="card-text">
+                        <strong>How it works:</strong> Enter a user ID above (try user IDs like 4, 10, or others), and we'll find recommendations 
+                        based on what similar users have liked.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if user_id %}
+    <div class="alert alert-info">
+        <h5>Showing recommendations for User ID: <strong>{{ user_id }}</strong></h5>
+    </div>
+    {% endif %}
+    
+    <!-- Display message if no recommendations are available -->
+    {% if message %}
+    <div class="message-alert">
+        <i class="fas fa-info-circle mr-2"></i> {{ message }}
+    </div>
+    {% endif %}
+    
+    <!-- Display recommendations -->
+    {% if not collaborative_rec.empty %}
+    <div class="row">
+        {% for index, row in collaborative_rec.iterrows() %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100">
+                <img src="{{ row.ImageURL }}" class="card-img-top" alt="{{ row.Name }}" onerror="this.onerror=null;this.src='https://via.placeholder.com/300x200?text=No+Image+Available';">
+                <div class="card-body">
+                    <h5 class="card-title">{{ truncate(row.Name, 50) }}</h5>
+                    <p class="card-text">Brand: {{ row.Brand }}</p>
+                    <div class="rating">
+                        {% set rating = row.Rating|float %}
+                        {% for i in range(5) %}
+                            {% if i < rating|int %}
+                            <i class="fas fa-star"></i>
+                            {% elif i < rating and rating|int != rating %}
+                            <i class="fas fa-star-half-alt"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="ml-2 text-muted">({{ row.ReviewCount|int }})</span>
+                    </div>
+                    <p class="price">${{ ((row.Rating + 8) * 4.99)|round(2) }}</p>
+                    <button class="btn btn-primary card-button" data-toggle="modal" data-target="#productModal{{ index }}">
+                        <i class="fas fa-eye mr-1"></i> View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Modal -->
+        <div class="modal fade" id="productModal{{ index }}" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">{{ row.Name }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <img src="{{ row.ImageURL }}" class="img-fluid product-image" alt="{{ row.Name }}" onerror="this.src='https://via.placeholder.com/500x500?text=No+Image+Available'">
+                            </div>
+                            <div class="col-md-7 product-details">
+                                <h4>{{ row.Name }}</h4>
+                                <p class="mb-2"><strong>Brand:</strong> {{ row.Brand }}</p>
+                                <p class="mb-2"><strong>Category:</strong> {{ ["Beauty", "Electronics", "Fashion", "Home & Kitchen", "Health & Wellness"]|random }}</p>
+                                <div class="rating mb-3">
+                                    {% for i in range(5) %}
+                                        {% if i < rating|int %}
+                                        <i class="fas fa-star"></i>
+                                        {% elif i < rating and rating|int != rating %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ml-2 text-muted">({{ row.ReviewCount|int }} reviews)</span>
+                                </div>
+                                <hr>
+                                <div class="product-price mb-4">${{ ((row.Rating + 8) * 4.99)|round(2) }}</div>
+                                <p class="mb-4">This product is recommended because users with similar preferences have shown interest in this item. Our collaborative filtering system identified patterns in user behavior to suggest this product specifically for you.</p>
+                                <div class="quantity-control">
+                                    <button class="quantity-btn decrease">-</button>
+                                    <input type="text" class="quantity-input" value="1" readonly>
+                                    <button class="quantity-btn increase">+</button>
+                                </div>
+                                <div class="d-flex mt-4">
+                                    <button class="btn btn-outline-primary mr-3"><i class="far fa-heart mr-2"></i> Add to Wishlist</button>
+                                    <button class="btn btn-primary"><i class="fas fa-cart-plus mr-2"></i> Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Finding recommendations based on user behavior...</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get references to the search form and loading overlay
+        const searchForm = document.getElementById('searchForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        // Show loading overlay when form is submitted
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                // Show the loading overlay
+                loadingOverlay.style.visibility = 'visible';
+                loadingOverlay.style.opacity = '1';
+            });
+        }
+
+        // Hide loading overlay if already showing when page loads (for page refreshes)
+        if (loadingOverlay) {
+            window.addEventListener('load', function() {
+                // After a short delay to ensure results are rendered
+                setTimeout(() => {
+                    loadingOverlay.style.visibility = 'hidden';
+                    loadingOverlay.style.opacity = '0';
+                }, 300);
+            });
+        }
+        
+        // Handle quantity buttons
+        const decreaseBtns = document.querySelectorAll('.quantity-btn.decrease');
+        const increaseBtns = document.querySelectorAll('.quantity-btn.increase');
+        
+        decreaseBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.nextElementSibling;
+                let value = parseInt(input.value);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+            });
+        });
+        
+        increaseBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                let value = parseInt(input.value);
+                input.value = value + 1;
+            });
+        });
+
+        // Suggest some popular user IDs
+        const userIdInput = document.getElementById('user_id');
+        if (userIdInput) {
+            const popularUserIds = [4, 10, 15, 23, 42, 67, 89, 123];
+            const randomUserId = popularUserIds[Math.floor(Math.random() * popularUserIds.length)];
+            userIdInput.placeholder = `Enter a user ID (e.g., ${randomUserId})`;
+        }
+    });
+</script>
+{% endblock %}

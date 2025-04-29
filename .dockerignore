@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+recommender_venv/
+venv/
+ENV/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local development
+instance/
+.env
+.env.local
+.env.development
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Git
+.git/
+.gitignore
+
+# Large data files
+*.zip
+*.tsv
+Recommender System.zip

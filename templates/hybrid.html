@@ -1,0 +1,338 @@
+{% extends 'main.html' %}
+
+{% block title %}Hybrid Recommendations{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="section-title mb-5">Hybrid Recommendations</h1>
+    
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="search-container">
+                <form action="{{ url_for('hybrid') }}" method="POST" id="searchForm">
+                    <div class="autocomplete-wrapper">
+                        <input type="text" class="form-control search-input" placeholder="Enter a product name..." name="prod" id="productSearch" required autocomplete="off">
+                        <div class="search-suggestions" id="search-suggestions"></div>
+                    </div>
+                    <input type="number" class="form-control search-input" placeholder="User ID (e.g. 4, 10)" name="user_id" id="user_id" value="4" required>
+                    <input type="number" class="form-control number-input" placeholder="# Results" name="nbr" min="1" max="20" value="10">
+                    <button type="submit" class="btn btn-primary search-btn">
+                        <i class="fas fa-search mr-2"></i> Find Products
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Explanation of hybrid filtering -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">What is Hybrid Filtering?</h5>
+                    <p class="card-text">
+                        Hybrid filtering combines multiple recommendation techniques to provide the most comprehensive suggestions. 
+                        It merges content-based recommendations (based on product characteristics) with collaborative filtering (based on user behavior).
+                    </p>
+                    <p class="card-text">
+                        <strong>How it works:</strong> Enter both a product name and a user ID to get personalized recommendations that consider 
+                        both the product's attributes and the preferences of similar users.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if search_item and user_id %}
+    <div class="alert alert-info">
+        <h5>Showing hybrid recommendations for User ID: <strong>{{ user_id }}</strong> and product: <strong>{{ search_item }}</strong></h5>
+    </div>
+    {% endif %}
+    
+    <!-- Display message if no recommendations are available -->
+    {% if message %}
+    <div class="message-alert">
+        <i class="fas fa-info-circle mr-2"></i> {{ message }}
+    </div>
+    {% endif %}
+    
+    <!-- Display recommendations -->
+    {% if not hybrid_rec.empty %}
+    <div class="row">
+        {% for index, row in hybrid_rec.iterrows() %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100">
+                <img src="{{ row.ImageURL }}" class="card-img-top" alt="{{ row.Name }}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image+Available'">
+                <div class="card-body">
+                    <h5 class="card-title">{{ truncate(row.Name, 50) }}</h5>
+                    <p class="card-text">{{ row.Brand }}</p>
+                    <div class="rating">
+                        {% set rating = row.Rating|float %}
+                        {% for i in range(5) %}
+                            {% if i < rating|int %}
+                            <i class="fas fa-star"></i>
+                            {% elif i < rating and rating|int != rating %}
+                            <i class="fas fa-star-half-alt"></i>
+                            {% else %}
+                            <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="ml-2 text-muted">({{ row.ReviewCount|int }})</span>
+                    </div>
+                    <p class="price">${{ ((row.Rating + 8) * 4.99)|round(2) }}</p>
+                    <button class="btn btn-primary card-button" data-toggle="modal" data-target="#productModal{{ index }}">
+                        <i class="fas fa-eye mr-1"></i> View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Modal -->
+        <div class="modal fade" id="productModal{{ index }}" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">{{ row.Name }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <img src="{{ row.ImageURL }}" class="img-fluid product-image" alt="{{ row.Name }}" onerror="this.src='https://via.placeholder.com/500x500?text=No+Image+Available'">
+                            </div>
+                            <div class="col-md-7 product-details">
+                                <h4>{{ row.Name }}</h4>
+                                <p class="mb-2"><strong>Brand:</strong> {{ row.Brand }}</p>
+                                <p class="mb-2"><strong>Category:</strong> {{ ["Beauty", "Electronics", "Fashion", "Home & Kitchen", "Health & Wellness"]|random }}</p>
+                                <div class="rating mb-3">
+                                    {% for i in range(5) %}
+                                        {% if i < rating|int %}
+                                        <i class="fas fa-star"></i>
+                                        {% elif i < rating and rating|int != rating %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ml-2 text-muted">({{ row.ReviewCount|int }} reviews)</span>
+                                </div>
+                                <hr>
+                                <div class="product-price mb-4">${{ ((row.Rating + 8) * 4.99)|round(2) }}</div>
+                                
+                                <p class="mb-4">This product is recommended by our hybrid system that combines product similarities and user preferences for the most relevant recommendations.</p>
+                                
+                                <div class="quantity-control">
+                                    <button class="quantity-btn decrease">-</button>
+                                    <input type="text" class="quantity-input" value="1" readonly>
+                                    <button class="quantity-btn increase">+</button>
+                                </div>
+                                
+                                <div class="d-flex">
+                                    <button class="btn btn-outline-primary mr-2" style="flex: 1;">
+                                        <i class="far fa-heart"></i> Add to Wishlist
+                                    </button>
+                                    <button class="btn btn-primary" style="flex: 2;">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <p class="mb-1"><i class="fas fa-truck mr-2"></i> Free shipping for orders over $50</p>
+                                    <p class="mb-1"><i class="fas fa-undo mr-2"></i> 30-day return policy</p>
+                                    <p><i class="fas fa-shield-alt mr-2"></i> 1 year warranty</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Generating hybrid recommendations...</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get references to the search form and loading overlay
+        const searchForm = document.getElementById('searchForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        // Show loading overlay when form is submitted
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                // Show the loading overlay
+                loadingOverlay.style.visibility = 'visible';
+                loadingOverlay.style.opacity = '1';
+            });
+        }
+
+        // Hide loading overlay if already showing when page loads (for page refreshes)
+        if (loadingOverlay) {
+            window.addEventListener('load', function() {
+                // After a short delay to ensure results are rendered
+                setTimeout(() => {
+                    loadingOverlay.style.visibility = 'hidden';
+                    loadingOverlay.style.opacity = '0';
+                }, 300);
+            });
+        }
+        
+        // Handle quantity buttons
+        const decreaseBtns = document.querySelectorAll('.quantity-btn.decrease');
+        const increaseBtns = document.querySelectorAll('.quantity-btn.increase');
+        
+        decreaseBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.nextElementSibling;
+                let value = parseInt(input.value);
+                if (value > 1) {
+                    input.value = value - 1;
+                }
+            });
+        });
+        
+        increaseBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                let value = parseInt(input.value);
+                input.value = value + 1;
+            });
+        });
+
+        // Enhanced search functionality
+        const productSearch = document.getElementById('productSearch');
+        if (productSearch) {
+            // Create popular product options
+            const productOptions = [
+                "Maybelline SuperStay Matte Ink Liquid Lipstick",
+                "Dove Beauty Bar",
+                "Pantene Pro-V Shampoo and Conditioner",
+                "Nivea Men's Body Wash",
+                "CeraVe Moisturizing Cream",
+                "Colgate Total Whitening Toothpaste",
+                "Suave Professionals Shampoo",
+                "Burt's Bees Lip Balm",
+                "Kokie Professional Matte Lipstick",
+                "OPI Infinite Shine, Nail Lacquer Nail Polish",
+                "Black Radiance Perfect Tone Matte Lip Crème",
+                "Crest 3D White Brilliance Toothpaste",
+                "Olay Regenerist Micro-Sculpting Cream",
+                "L'Oreal Paris Colour Riche Lipstick",
+                "Cetaphil Daily Facial Cleanser"
+            ];
+
+            // Get the search suggestions container
+            const suggestionsContainer = document.getElementById('search-suggestions');
+
+            // Function to filter suggestions
+            function filterSuggestions(query) {
+                if (!query) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+                
+                query = query.toLowerCase();
+                const filteredOptions = productOptions.filter(option => 
+                    option.toLowerCase().includes(query)
+                ).slice(0, 7); // Limit to top 7 matches
+                
+                if (filteredOptions.length > 0) {
+                    suggestionsContainer.innerHTML = '';
+                    filteredOptions.forEach(option => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.textContent = option;
+                        div.addEventListener('click', () => {
+                            productSearch.value = option;
+                            suggestionsContainer.style.display = 'none';
+                        });
+                        suggestionsContainer.appendChild(div);
+                    });
+                    suggestionsContainer.style.display = 'block';
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            }
+
+            // Event listeners for search input
+            productSearch.addEventListener('input', function() {
+                filterSuggestions(this.value);
+            });
+            
+            productSearch.addEventListener('focus', function() {
+                if (this.value) {
+                    filterSuggestions(this.value);
+                }
+            });
+            
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== productSearch && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+            
+            // Keyboard navigation in suggestions
+            let selectedIndex = -1;
+            
+            productSearch.addEventListener('keydown', function(e) {
+                const suggestions = document.querySelectorAll('.suggestion-item');
+                
+                // Down arrow
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex + 1) % suggestions.length;
+                    highlightSuggestion(suggestions, selectedIndex);
+                }
+                // Up arrow
+                else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = selectedIndex <= 0 ? suggestions.length - 1 : selectedIndex - 1;
+                    highlightSuggestion(suggestions, selectedIndex);
+                }
+                // Enter key
+                else if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    if (suggestions[selectedIndex]) {
+                        productSearch.value = suggestions[selectedIndex].textContent;
+                        suggestionsContainer.style.display = 'none';
+                        selectedIndex = -1;
+                    }
+                }
+                // Escape key
+                else if (e.key === 'Escape') {
+                    suggestionsContainer.style.display = 'none';
+                    selectedIndex = -1;
+                }
+            });
+            
+            function highlightSuggestion(suggestions, index) {
+                for (let i = 0; i < suggestions.length; i++) {
+                    suggestions[i].classList.remove('selected');
+                }
+                if (suggestions[index]) {
+                    suggestions[index].classList.add('selected');
+                    suggestions[index].scrollIntoView({ block: 'nearest' });
+                }
+            }
+        }
+
+        // Suggest some popular user IDs
+        const userIdInput = document.getElementById('user_id');
+        if (userIdInput) {
+            const popularUserIds = [4, 10, 15, 23, 42, 67, 89, 123];
+            const randomUserId = popularUserIds[Math.floor(Math.random() * popularUserIds.length)];
+            userIdInput.placeholder = `User ID (e.g. ${randomUserId})`;
+        }
+    });
+</script>
+{% endblock %}

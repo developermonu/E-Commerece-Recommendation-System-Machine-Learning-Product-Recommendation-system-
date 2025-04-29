@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecommerce Recommendation System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #ff6b6b;
+            --accent-color: #ffd166;
+            --text-color: #2d3748;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+        }
+        
+        .navbar {
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 15px 0;
+            background-color: #fff !important;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.btn {
+            border-radius: 50px;
+            padding: 8px 20px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .container {
+            margin-top: 30px;
+        }
+        
+        .video-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 40px;
+        }
+        
+        .video-background {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.3));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        .video-overlay h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .video-overlay p {
+            font-size: 1.2rem;
+            max-width: 600px;
+        }
+        
+        .main-action-btn {
+            margin-top: 15px;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(74, 108, 247, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .main-action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(74, 108, 247, 0.4);
+        }
+        
+        .section-title {
+            position: relative;
+            margin-bottom: 40px;
+            font-weight: 700;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -10px;
+            width: 50px;
+            height: 3px;
+            background-color: var(--secondary-color);
+            transform: translateX(-50%);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            line-height: 1.3;
+            height: 2.6rem;
+            overflow: hidden;
+        }
+        
+        .card-text {
+            color: #718096;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .rating {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 20px 25px;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding: 15px 25px;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            background-color: #2d3748;
+            color: white;
+            padding: 50px 0 20px;
+            margin-top: 80px;
+        }
+        
+        footer h5 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        footer a {
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+        
+        footer a:hover {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        .social-icons {
+            margin-top: 15px;
+        }
+        
+        .social-icons a {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        @media (max-width: 768px) {
+            .video-background {
+                height: 350px;
+            }
+            
+            .video-overlay h1 {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">SmartShop<span style="color: var(--secondary-color);">.</span></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="index"><i class="fas fa-home"></i> Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main"><i class="fas fa-shopping-bag"></i> Shop</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="recommenderDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-lightbulb"></i> Recommenders
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="recommenderDropdown">
+                        <a class="dropdown-item" href="{{ url_for('content_based') }}">Content-Based</a>
+                        <a class="dropdown-item" href="{{ url_for('collaborative') }}">Collaborative Filtering</a>
+                        <a class="dropdown-item" href="{{ url_for('rating_based') }}">Rating-Based</a>
+                        <a class="dropdown-item" href="{{ url_for('hybrid') }}">Hybrid Approach</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="settingsLink"><i class="fas fa-cog"></i> Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-heart"></i> <span class="badge badge-light">0</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-shopping-cart"></i> <span class="badge badge-light">0</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-outline-primary mr-2" href="#" data-toggle="modal" data-target="#signupModal">Sign Up</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-primary" href="#" data-toggle="modal" data-target="#signinModal">Sign In</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section with Video -->
+<div class="container mt-4">
+    <div class="video-container">
+        <video class="video-background" autoplay loop muted>
+            <source src="/static/v.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay">
+            <div class="container d-flex flex-column h-100 justify-content-center text-white">
+                <h1 class="display-4 font-weight-bold mb-4">Discover Products <br>You'll Love</h1>
+                <p class="lead mb-4">Our AI recommendation system finds products <br>perfectly matched to your preferences.</p>
+                <a href="main" class="btn main-action-btn align-self-start">
+                    <i class="fas fa-shopping-bag mr-2"></i> Start Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if signup_message %}
+<div class="container">
+    <div class="alert alert-success" role="alert">
+        {{signup_message}}
+    </div>
+</div>
+{% endif %}
+
+<!-- Products Section -->
+<div class="container mt-5" id="products">
+    <h2 class="section-title text-center">Trending Products</h2>
+    <div class="row">
+        {% for index, product in trending_products.iterrows() %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100">
+                <img src="{{ random_product_image_urls[index] }}" class="card-img-top" alt="{{ product['Name'] }}">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ truncate(product['Name'],50) }}</h5>
+                    <p class="card-text">{{ product['Brand'] }}</p>
+                    <div class="rating">
+                        {% for i in range(product['Rating']|int) %}
+                        <i class="fas fa-star"></i>
+                        {% endfor %}
+                        {% if product['Rating'] % 1 >= 0.5 %}
+                        <i class="fas fa-star-half-alt"></i>
+                        {% endif %}
+                        {% for i in range(5 - product['Rating']|round|int) %}
+                        <i class="far fa-star"></i>
+                        {% endfor %}
+                        <span class="ml-2 text-muted small">({{ product['ReviewCount'] }})</span>
+                    </div>
+                    <div class="text-primary font-weight-bold mb-3">${{ ((product['Rating'] + 10) * 3.99)|round(2) }}</div>
+                    <button type="button" class="btn btn-primary mt-auto" data-toggle="modal" data-target="#productModal{{ index }}">
+                        <i class="fas fa-eye mr-1"></i> View Details
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Modal -->
+        <div class="modal fade" id="productModal{{ index }}" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">{{ product['Name'] }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <img src="{{ random_product_image_urls[index] }}" class="img-fluid rounded" alt="{{ product['Name'] }}">
+                            </div>
+                            <div class="col-md-7">
+                                <h4>{{ product['Name'] }}</h4>
+                                <div class="rating mb-3">
+                                    {% for i in range(product['Rating']|int) %}
+                                    <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                    {% if product['Rating'] % 1 >= 0.5 %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                    {% endif %}
+                                    {% for i in range(5 - product['Rating']|round|int) %}
+                                    <i class="far fa-star"></i>
+                                    {% endfor %}
+                                    <span class="ml-2 text-muted">({{ product['ReviewCount'] }} reviews)</span>
+                                </div>
+                                <p class="mb-2"><strong>Brand:</strong> {{ product['Brand'] }}</p>
+                                <p class="mb-2"><strong>Category:</strong> {{ ["Beauty", "Electronics", "Fashion", "Home & Kitchen", "Health & Wellness"]|random }}</p>
+                                <p class="mb-4"><strong>Price:</strong> <span class="text-primary font-weight-bold">${{ ((product['Rating'] + 10) * 3.99)|round(2) }}</span></p>
+                                <hr>
+                                <p class="mb-4">{{ ["This premium product offers exceptional quality and value.", 
+                                              "A customer favorite, known for its durability and performance.", 
+                                              "Crafted with care using high-quality materials for lasting satisfaction.",
+                                              "Versatile and practical design to enhance your everyday life.",
+                                              "Innovative features make this product stand out from competitors."]|random }}</p>
+                                <div class="input-group mb-3" style="max-width: 150px">
+                                    <div class="input-group-prepend">
+                                        <button class="btn btn-outline-secondary" type="button">-</button>
+                                    </div>
+                                    <input type="text" class="form-control text-center" value="1">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-primary"><i class="far fa-heart"></i> Add to Wishlist</button>
+                        <button type="button" class="btn btn-primary"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100 py-4">
+                <div class="card-body">
+                    <i class="fas fa-robot fa-3x mb-3" style="color: var(--primary-color)"></i>
+                    <h4>AI-Powered Recommendations</h4>
+                    <p class="text-muted">Our advanced algorithm learns your preferences to suggest products you'll love.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100 py-4">
+                <div class="card-body">
+                    <i class="fas fa-shipping-fast fa-3x mb-3" style="color: var(--primary-color)"></i>
+                    <h4>Fast & Secure Delivery</h4>
+                    <p class="text-muted">Enjoy free shipping on all orders with our trusted delivery partners.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100 py-4">
+                <div class="card-body">
+                    <i class="fas fa-headset fa-3x mb-3" style="color: var(--primary-color)"></i>
+                    <h4>24/7 Customer Support</h4>
+                    <p class="text-muted">Our dedicated team is always ready to help with any questions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap modal for sign up -->
+<div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signupModalLabel">Create an Account</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/signup" method="post">
+                    <div class="form-group">
+                        <label for="username"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Or sign up with:</p>
+                    <button class="btn btn-outline-primary mx-1"><i class="fab fa-google"></i></button>
+                    <button class="btn btn-outline-primary mx-1"><i class="fab fa-facebook-f"></i></button>
+                    <button class="btn btn-outline-primary mx-1"><i class="fab fa-twitter"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap modal for sign in -->
+<div class="modal fade" id="signinModal" tabindex="-1" aria-labelledby="signinModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signinModalLabel">Welcome Back</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/signin" method="post">
+                    <div class="form-group">
+                        <label for="signinUsername"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" class="form-control" id="signinUsername" name="signinUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signinPassword"><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" class="form-control" id="signinPassword" name="signinPassword" required>
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                        <a href="#" class="float-right">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Don't have an account? <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#signupModal">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="settingsModalLabel"><i class="fas fa-cog"></i> Settings</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5 class="mb-3">Choose Theme:</h5>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="theme" id="defaultTheme" value="default" checked>
+                    <label class="form-check-label" for="defaultTheme">
+                        Light Theme
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="theme" id="blackTheme" value="black">
+                    <label class="form-check-label" for="blackTheme">
+                        Dark Theme
+                    </label>
+                </div>
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="radio" name="theme" id="greenTheme" value="green">
+                    <label class="form-check-label" for="greenTheme">
+                        Green Theme
+                    </label>
+                </div>
+                <hr>
+                <h5 class="mb-3">Display Options:</h5>
+                <div class="mb-3">
+                    <label for="fontSizeRange">Font Size</label>
+                    <input type="range" class="custom-range" min="80" max="120" value="100" id="fontSizeRange">
+                </div>
+                <div class="btn-group mb-4" role="group">
+                    <button type="button" class="btn btn-outline-secondary" id="zoomOut"><i class="fas fa-search-minus"></i> Zoom Out</button>
+                    <button type="button" class="btn btn-outline-secondary" id="zoomIn"><i class="fas fa-search-plus"></i> Zoom In</button>
+                </div>
+                <hr>
+                <h5 class="mb-3">Notification Settings:</h5>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="emailNotif" checked>
+                    <label class="form-check-label" for="emailNotif">
+                        Email Notifications
+                    </label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="productNotif" checked>
+                    <label class="form-check-label" for="productNotif">
+                        Product Recommendations
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="applyTheme">Apply Settings</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-sm-6 mb-4">
+                <h5>About SmartShop</h5>
+                <p>We use advanced AI technology to provide personalized shopping experiences that help you discover products you'll truly love.</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#"><i class="fas fa-angle-right mr-2"></i>Home</a></li>
+                    <li><a href="#"><i class="fas fa-angle-right mr-2"></i>Shop</a></li>
+                    <li><a href="#"><i class="fas fa-angle-right mr-2"></i>About Us</a></li>
+                    <li><a href="#"><i class="fas fa-angle-right mr-2"></i>Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <h5>Customer Service</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#"><i class="fas fa-angle-right mr-2"></i>FAQ</a></li>
+                    <li><a href="#"><i class="fas fa-angle-right mr-2"></i>Shipping Policy</a></li>
+                    <li><a href="#"><i class="fas fa-angle-right mr-2"></i>Returns & Refunds</a></li>
+                    <li><a href="#"><i class="fas fa-angle-right mr-2"></i>Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <h5>Contact Us</h5>
+                <address>
+                    <p><i class="fas fa-map-marker-alt mr-2"></i> 123 Commerce St, Tech City</p>
+                    <p><i class="fas fa-phone mr-2"></i> +1 (555) 123-4567</p>
+                    <p><i class="fas fa-envelope mr-2"></i> support@smartshop.com</p>
+                </address>
+                <h5 class="mt-4">Newsletter</h5>
+                <div class="input-group">
+                    <input type="email" class="form-control" placeholder="Your Email">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="button"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <hr class="bg-light">
+                <p class="text-center mb-0">© 2024 SmartShop AI Recommendation System. All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Handle click on Settings link to open the modal
+    document.getElementById('settingsLink').addEventListener('click', function() {
+        $('#settingsModal').modal('show');
+    });
+
+    // Handle theme apply button click
+    document.getElementById('applyTheme').addEventListener('click', function() {
+        // Get the selected theme value
+        var selectedTheme = document.querySelector('input[name="theme"]:checked').value;
+        var fontSize = document.getElementById('fontSizeRange').value;
+
+        // Apply the font size
+        document.body.style.fontSize = fontSize + '%';
+
+        // Apply the selected theme
+        if (selectedTheme === 'black') {
+            document.documentElement.style.setProperty('--light-bg', '#121212');
+            document.documentElement.style.setProperty('--text-color', '#f8f9fa');
+            document.body.style.backgroundColor = '#121212';
+            document.body.style.color = '#f8f9fa';
+        } else if (selectedTheme === 'green') {
+            document.documentElement.style.setProperty('--primary-color', '#2ecc71');
+            document.documentElement.style.setProperty('--light-bg', '#e8f5e9');
+            document.body.style.backgroundColor = '#e8f5e9';
+            document.body.style.color = '#2c3e50';
+        } else {
+            // Default theme
+            document.documentElement.style.setProperty('--light-bg', '#f8f9fa');
+            document.documentElement.style.setProperty('--text-color', '#2d3748');
+            document.documentElement.style.setProperty('--primary-color', '#4a6cf7');
+            document.body.style.backgroundColor = '#f8f9fa';
+            document.body.style.color = '#2d3748';
+        }
+
+        // Close the modal
+        $('#settingsModal').modal('hide');
+    });
+
+    // Handle zoom in button click
+    document.getElementById('zoomIn').addEventListener('click', function() {
+        document.body.style.zoom = "110%";
+    });
+
+    // Handle zoom out button click
+    document.getElementById('zoomOut').addEventListener('click', function() {
+        document.body.style.zoom = "100%";
+    });
+    
+    // Font size slider
+    document.getElementById('fontSizeRange').addEventListener('input', function() {
+        document.body.style.fontSize = this.value + '%';
+    });
+</script>
+
+</body>
+</html>
